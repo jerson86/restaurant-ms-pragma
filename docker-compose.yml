@@ -17,3 +17,14 @@ services:
       SERVER_PORT: 8080
     depends_on:
       - user-ms
+
+  mysql-db:
+    image: mysql:8.0 # Imagen oficial de MySQL
+    container_name: mysql_powerup_db_restaurant
+    restart: always
+    environment:
+      # Las variables de entorno para MySQL deben coincidir con tu aplicación
+      MYSQL_ROOT_PASSWORD: secret123
+      MYSQL_DATABASE: powerup_db
+    ports:
+      - "3307:3306"

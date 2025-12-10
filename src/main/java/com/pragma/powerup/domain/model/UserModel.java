@@ -5,16 +5,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RestaurantModel {
+public class UserModel {
     private Long id;
     private String nombre;
-    private String nit;
-    private String direccion;
+    private String apellido;
+    private String documento;
     private String telefono;
-    private String urlLogo;
-    private Long userId;
+    private LocalDate fechaNacimiento;
+    private String correo;
 }

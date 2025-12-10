@@ -8,14 +8,9 @@ import com.pragma.powerup.domain.model.RestaurantModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,71 +22,58 @@ class RestaurantHandlerTest {
     @Mock
     private IRestaurantRequestMapper objectRequestMapper;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private RestaurantHandler restaurantHandler;
 
-    private CreateRestaurantRequest request;
-    private RestaurantModel restaurantModel;
+    private CreateRestaurantRequest mockRequest;
+    private RestaurantModel mockModel;
 
     @BeforeEach
-    void setup() {
-        request = new CreateRestaurantRequest();
-        request.setNombre("Carlos");
-        request.setApellido("Ramirez");
-        request.setCorreo("owner@test.com");
-        request.setClave("1234");
+    void setUp() {
+        mockRequest = new CreateRestaurantRequest("NombreRest", "1111111111", "calle 11", "312333333", "logo.jpg", 1L);
 
-        restaurantModel = new RestaurantModel();
-        restaurantModel.setCorreo("owner@test.com");
-    }
-
-    @Test
-    void saveRestaurant_ShouldMapEncodeAndCallService() {
-
-        // Arrange
-        when(objectRequestMapper.toObject(request)).thenReturn(restaurantModel);
-        when(passwordEncoder.encode("1234")).thenReturn("ENCODED_PASSWORD");
-
-        // Act
-        restaurantHandler.saveRestaurant(request);
-
-        // Assert
-        assertEquals("ENCODED_PASSWORD", restaurantModel.getClave());
-        verify(objectRequestMapper, times(1)).toObject(request);
-        verify(passwordEncoder, times(1)).encode("1234");
-
-        // Capture argument to ensure correct object passed
-        ArgumentCaptor<RestaurantModel> captor = ArgumentCaptor.forClass(RestaurantModel.class);
-        verify(userServicePort, times(1)).saveRestaurant(captor.capture());
-
-        assertEquals("ENCODED_PASSWORD", captor.getValue().getClave());
-    }
-
-    @Test
-    void saveRestaurant_WhenServiceThrowsException_ShouldPropagate() {
-        // Arrange
-        when(objectRequestMapper.toObject(request)).thenReturn(restaurantModel);
-        when(passwordEncoder.encode(anyString())).thenReturn("ENCODED");
-        doThrow(new RuntimeException("DB error")).when(userServicePort).saveRestaurant(any());
-
-        // Act & Assert
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> restaurantHandler.saveRestaurant(request)
+        mockModel = new RestaurantModel(
+                1L,
+                "NombreRest",
+                "1111111111",
+                "calle 11",
+                "312333333",
+                "logo.jpg",
+                1L
         );
 
-        assertEquals("DB error", ex.getMessage());
-        verify(userServicePort).saveRestaurant(any());
+        when(objectRequestMapper.toObject(mockRequest)).thenReturn(mockModel);
     }
 
     @Test
-    void saveRestaurant_ShouldFailIfMapperReturnsNull() {
-        // Arrange
-        when(objectRequestMapper.toObject(request)).thenReturn(null);
+    void saveRestaurant_SuccessfulMappingAndPersistence() {
+        // ARRANGE
+        doNothing().when(userServicePort).saveRestaurant(any(RestaurantModel.class));
 
-        // Act & Assert
-        assertThrows(NullPointerException.class, () -> restaurantHandler.saveRestaurant(request));
+        // ACT
+        restaurantHandler.saveRestaurant(mockRequest);
+
+        // ASSERT
+        verify(objectRequestMapper, times(1)).toObject(mockRequest);
+        verify(userServicePort, times(1)).saveRestaurant(mockModel);
+
+        verify(userServicePort).saveRestaurant(argThat(model ->
+                model.getNombre().equals(mockModel.getNombre()) &&
+                        model.getUserId().equals(mockModel.getUserId())
+        ));
+    }
+
+    @Test
+    void saveRestaurant_WhenServicePortThrowsException_ShouldThrow() {
+        // ARRANGE
+        doThrow(new RuntimeException("Error en el handler")).when(userServicePort).saveRestaurant(any(RestaurantModel.class));
+
+        // ACT
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            restaurantHandler.saveRestaurant(mockRequest);
+        });
+
+        // ASSERT
+        verify(objectRequestMapper, times(1)).toObject(mockRequest);
     }
 }

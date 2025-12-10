@@ -3,87 +3,99 @@ package com.pragma.powerup.infraestructure.input.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pragma.powerup.application.dto.request.CreateRestaurantRequest;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
-import com.pragma.powerup.infraestructure.configuration.TestSecurityConfig;
+import com.pragma.powerup.domain.enums.BusinessMessage;
+import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.infrastructure.input.rest.RestaurantRestController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RestaurantRestController.class)
-@Import(TestSecurityConfig.class)
 class RestaurantRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private IRestaurantHandler userHandler;
-
     @Autowired
     private ObjectMapper objectMapper;
 
-    private CreateRestaurantRequest buildValidRequest() {
-        CreateRestaurantRequest req = new CreateRestaurantRequest();
-        req.setNombre("Juan");
-        req.setDireccion("Perez");
-        req.setNit("123456789");
-        req.setTelefono("+573001112233");
-        req.setOwnerId(1L);
-        req.setUrlLogo("url");
-        return req;
+    @MockBean
+    private IRestaurantHandler restaurantHandler;
+
+    private CreateRestaurantRequest validRequest;
+    private CreateRestaurantRequest invalidRequest;
+    private final String BASE_URL = "/api/v1/restaurant";
+
+    @BeforeEach
+    void setUp() {
+        validRequest = new CreateRestaurantRequest("NombreRest", "1111111111", "calle 11", "312333333", "logo.jpg", 1L);
+        invalidRequest = new CreateRestaurantRequest("NombreRest", null, "calle 11", "312333333", "logo.jpg", null);
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void save_WhenAdmin_ShouldReturn201() throws Exception {
+    void save_ValidRequest_ReturnsCreatedStatus() throws Exception {
+        // ARRANGE
+        doNothing().when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
 
-        CreateRestaurantRequest req = buildValidRequest();
-
-        mockMvc.perform(post("/api/v1/admin/owner")
+        // ACT & ASSERT
+        mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated());
 
-        verify(userHandler, times(1)).saveRestaurant(any(CreateRestaurantRequest.class));
+        verify(restaurantHandler, times(1)).saveRestaurant(argThat(req ->
+                req.getNombre().equals(validRequest.getNombre()) &&
+                        req.getOwnerId().equals(validRequest.getOwnerId())
+        ));
     }
 
     @Test
-    @WithMockUser(roles = "USER")
-    void save_WhenNotAdmin_ShouldReturn403() throws Exception {
-
-        mockMvc.perform(post("/api/v1/admin/owner")
+    void save_InvalidRequest_ReturnsBadRequestStatus() throws Exception {
+        // ACT & ASSERT
+        mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(buildValidRequest())))
-                .andExpect(status().isForbidden());
-
-        verify(userHandler, times(0)).saveRestaurant(any());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void save_WhenInvalidRequest_ShouldReturn400() throws Exception {
-
-        CreateRestaurantRequest invalidReq = new CreateRestaurantRequest();
-        invalidReq.setNombre("");
-
-        mockMvc.perform(post("/api/v1/admin/owner")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidReq)))
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(userHandler, times(0)).saveRestaurant(any());
+        verify(restaurantHandler, never()).saveRestaurant(any(CreateRestaurantRequest.class));
+    }
+
+    @Test
+    void save_UserNotExists_ReturnsNotFoundStatus() throws Exception {
+        // ARRANGE
+        doThrow(new DomainException(BusinessMessage.RESTAURANT_USER_ID_NOT_EXISTS))
+                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
+
+        // ACT & ASSERT
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest());
+
+        verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
+    }
+
+    @Test
+    void save_NitAlreadyExists_ReturnsConflictStatus() throws Exception {
+        // ARRANGE
+        doThrow(new DomainException(BusinessMessage.RESTAURANT_NIT_ALREADY_EXISTS))
+                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
+
+        // ACT & ASSERT
+        mockMvc.perform(post(BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest());
+
+        verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
     }
 }

@@ -11,10 +11,7 @@ spring:
       ddl-auto: update
     show-sql: true
 
-app:
-  admin:
-    username: admin
-    password: admin123
+
 
 service:
   user:
