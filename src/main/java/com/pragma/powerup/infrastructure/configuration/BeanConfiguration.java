@@ -1,13 +1,19 @@
 package com.pragma.powerup.infrastructure.configuration;
 
+import com.pragma.powerup.domain.api.IPlateServicePort;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
+import com.pragma.powerup.domain.spi.IPlatePersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserRestPort;
+import com.pragma.powerup.domain.usecase.PlateUseCase;
 import com.pragma.powerup.domain.usecase.RestaurantUseCase;
 import com.pragma.powerup.infrastructure.out.feign.adapter.UserFeignAdapter;
 import com.pragma.powerup.infrastructure.out.feign.client.UserFeignClient;
+import com.pragma.powerup.infrastructure.out.jpa.adapter.PlateJpaAdapter;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.RestaurantJpaAdapter;
+import com.pragma.powerup.infrastructure.out.jpa.mapper.IPlateEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
+import com.pragma.powerup.infrastructure.out.jpa.repository.IPlateRepository;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +25,8 @@ public class BeanConfiguration {
     private final IRestaurantRepository restaurantRepository;
     private final IRestaurantEntityMapper restaurantEntityMapper;
     private final UserFeignClient userFeignClient;
+    private final IPlateRepository plateRepository;
+    private final IPlateEntityMapper plateEntityMapper;
 
     @Bean
     public IRestaurantPersistencePort restaurantPersistencePort() {
@@ -33,5 +41,15 @@ public class BeanConfiguration {
     @Bean
     public IUserRestPort userRestPort() {
         return new UserFeignAdapter(userFeignClient);
+    }
+
+    @Bean
+    public IPlatePersistencePort platePersistencePort() {
+        return new PlateJpaAdapter(plateRepository, plateEntityMapper);
+    }
+
+    @Bean
+    public IPlateServicePort plateServicePort() {
+        return new PlateUseCase(platePersistencePort(), restaurantPersistencePort());
     }
 }

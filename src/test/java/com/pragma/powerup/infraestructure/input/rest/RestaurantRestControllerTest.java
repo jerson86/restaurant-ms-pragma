@@ -79,7 +79,7 @@ class RestaurantRestControllerTest {
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
 
         verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
     }
@@ -94,7 +94,7 @@ class RestaurantRestControllerTest {
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
 
         verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
     }

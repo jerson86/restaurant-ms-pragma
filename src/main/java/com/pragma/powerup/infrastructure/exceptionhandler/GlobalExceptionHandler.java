@@ -1,7 +1,7 @@
 package com.pragma.powerup.infrastructure.exceptionhandler;
 
+import com.pragma.powerup.domain.enums.BusinessMessage;
 import com.pragma.powerup.domain.exception.DomainException;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,20 +15,6 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final String MESSAGE = "message";
-
-    @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoDataFoundException(
-            NoDataFoundException ignoredNoDataFoundException) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.NO_DATA_FOUND.getMessage()));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleBadRequest(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
@@ -52,7 +38,26 @@ public class GlobalExceptionHandler {
         body.put("error", "Bad Request");
         body.put("message", ex.getMessage());
 
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        if (ex.getMessage().equals(BusinessMessage.PLATE_NOT_FOUND.getMessage()) ||
+                ex.getMessage().equals(BusinessMessage.RESTAURANT_USER_ID_NOT_EXISTS.getMessage())||
+                ex.getMessage().equals(BusinessMessage.RESTAURANT_ID_NOT_EXISTS.getMessage())) {
+            body.put("status", HttpStatus.NOT_FOUND.value());
+            body.put("error", "Bad Request");
+            body.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(body);
+        }
+
+        if (ex.getMessage().equals(BusinessMessage.RESTAURANT_NIT_ALREADY_EXISTS.getMessage())) {
+            body.put("status", HttpStatus.CONFLICT.value());
+            body.put("error", "Bad Request");
+            body.put("message", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(body);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap("message", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
