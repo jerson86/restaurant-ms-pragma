@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.5.8'
+    id 'org.springframework.boot' version '3.3.13'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
     id 'jacoco'
@@ -21,7 +21,7 @@ ext {
     mapstructVersion = "1.6.3"
     lombokVersion = "1.18.42"
     lombokMapstructBindingVersion = "0.2.0"
-    openApiVersion = "2.8.14"
+    openApiVersion = "2.2.0"
 }
 
 dependencies {
@@ -42,7 +42,6 @@ dependencies {
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 dependencyManagement {

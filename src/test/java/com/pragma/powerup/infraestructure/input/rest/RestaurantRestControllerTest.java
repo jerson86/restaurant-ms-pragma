@@ -54,7 +54,7 @@ class RestaurantRestControllerTest {
 
         verify(restaurantHandler, times(1)).saveRestaurant(argThat(req ->
                 req.getNombre().equals(validRequest.getNombre()) &&
-                        req.getOwnerId().equals(validRequest.getOwnerId())
+                        req.getUserId().equals(validRequest.getUserId())
         ));
     }
 

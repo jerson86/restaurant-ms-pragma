@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   datasource:
@@ -11,8 +11,6 @@ spring:
       ddl-auto: update
     show-sql: true
 
-
-
 service:
   user:
-    url: http://user-ms:8080
+    url: http://user-ms:8080/api/v1

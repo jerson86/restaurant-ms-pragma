@@ -28,5 +28,5 @@ public class CreateRestaurantRequest {
     private String urlLogo;
 
     @NotNull
-    private Long ownerId;
+    private Long userId;
 }

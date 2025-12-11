@@ -22,10 +22,10 @@ public class RestaurantRestController {
 
     private final IRestaurantHandler restaurantHandler;
 
-    @Operation(summary = "Add a new object")
+    @Operation(summary = "Add a new restaurant")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "user created", content = @Content),
-            @ApiResponse(responseCode = "409", description = "user already exists", content = @Content)
+            @ApiResponse(responseCode = "201", description = "restaurant created", content = @Content),
+            @ApiResponse(responseCode = "409", description = "restaurant already exists", content = @Content)
     })
     @PostMapping
     public ResponseEntity<Void> save(@Valid @RequestBody CreateRestaurantRequest createRestaurantRequest) {

@@ -14,8 +14,6 @@ import java.math.BigDecimal;
 @Builder
 @EqualsAndHashCode
 public class UpdatePlateRequest {
-
-    @NotNull(message = "El ID del plato es obligatorio.")
     private Long id;
 
     @NotNull(message = "El precio es obligatorio.")

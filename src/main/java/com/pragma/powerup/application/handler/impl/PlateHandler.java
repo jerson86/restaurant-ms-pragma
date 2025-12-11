@@ -20,18 +20,13 @@ public class PlateHandler implements IPlateHandler {
 
     @Override
     public void savePlate(CreatePlateRequest createPlateRequest) {
-
-        // 1. Mapear el DTO de la aplicación al modelo de dominio
         PlateModel plateModel = plateRequestMapper.toModel(createPlateRequest);
-
-        // 2. Llamar al Use Case para aplicar la lógica de negocio y persistencia
         plateServicePort.savePlate(plateModel);
     }
 
     @Override
     public void updatePlate(UpdatePlateRequest updatePlateRequest) {
         PlateModel plateModel = plateRequestMapper.toModel(updatePlateRequest);
-
         plateServicePort.updatePlate(plateModel);
     }
 }
