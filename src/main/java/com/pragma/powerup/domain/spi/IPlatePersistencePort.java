@@ -5,4 +5,5 @@ import com.pragma.powerup.domain.model.PlateModel;
 public interface IPlatePersistencePort {
     void savePlate(PlateModel plateModel);
     PlateModel getPlateById(Long plateId);
+    void updatePlate(PlateModel plateModel);
 }

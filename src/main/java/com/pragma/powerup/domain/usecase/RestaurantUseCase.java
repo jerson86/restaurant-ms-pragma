@@ -6,6 +6,7 @@ import com.pragma.powerup.domain.exception.DomainException;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserRestPort;
+import com.pragma.powerup.domain.util.AuthValidator;
 
 public class RestaurantUseCase implements IRestaurantServicePort {
 
@@ -18,7 +19,9 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
-    public void saveRestaurant(RestaurantModel restaurantModel) {
+    public void saveRestaurant(RestaurantModel restaurantModel, String bearerToken) {
+        AuthValidator.validateUser(userRestPort, bearerToken);
+
         if (userRestPort.getUserById(restaurantModel.getUserId()) == null) {
             throw new DomainException(BusinessMessage.RESTAURANT_USER_ID_NOT_EXISTS);
         }

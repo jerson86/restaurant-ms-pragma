@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +29,10 @@ public class PlateRestController {
             @ApiResponse(responseCode = "403", description = "Acceso denegado (solo Propietarios)", content = @Content)
     })
 
-    //@PreAuthorize("hasRole('OWNER')")
     @PostMapping
-    public ResponseEntity<Void> save(@Valid @RequestBody CreatePlateRequest createPlateRequest) {
-        plateHandler.savePlate(createPlateRequest);
+    public ResponseEntity<Void> save(@Valid @RequestBody CreatePlateRequest createPlateRequest,
+                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        plateHandler.savePlate(createPlateRequest, bearerToken);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -42,11 +43,28 @@ public class PlateRestController {
             @ApiResponse(responseCode = "403", description = "Acceso denegado (no es el propietario del restaurante)", content = @Content),
             @ApiResponse(responseCode = "404", description = "Plato no encontrado", content = @Content)
     })
-    //@PreAuthorize("hasRole('OWNER')")
+
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePlate(@PathVariable Long id, @Valid @RequestBody UpdatePlateRequest updatePlateRequest) {
+    public ResponseEntity<Void> updatePlate(@PathVariable Long id, @Valid @RequestBody UpdatePlateRequest updatePlateRequest,
+                                            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
         updatePlateRequest.setId(id);
-        plateHandler.updatePlate(updatePlateRequest);
+        plateHandler.updatePlate(updatePlateRequest, bearerToken);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Operation(summary = "Habilitar/Deshabilitar plato por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Plato actualizado"),
+            @ApiResponse(responseCode = "403", description = "Acceso denegado/No es el propietario"),
+            @ApiResponse(responseCode = "404", description = "Plato o restaurante no encontrado")
+    })
+    @PutMapping("/status/{plateId}")
+    public ResponseEntity<Void> enableDisableDish(
+            @PathVariable Long plateId,
+            @RequestParam boolean enabled,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+
+        plateHandler.enableDisablePlate(plateId, enabled, bearerToken);
+        return ResponseEntity.ok().build();
     }
 }

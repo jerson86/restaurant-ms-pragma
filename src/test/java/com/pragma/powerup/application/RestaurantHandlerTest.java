@@ -28,6 +28,8 @@ class RestaurantHandlerTest {
     private CreateRestaurantRequest mockRequest;
     private RestaurantModel mockModel;
 
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
+
     @BeforeEach
     void setUp() {
         mockRequest = new CreateRestaurantRequest("NombreRest", "1111111111", "calle 11", "312333333", "logo.jpg", 1L);
@@ -48,30 +50,28 @@ class RestaurantHandlerTest {
     @Test
     void saveRestaurant_SuccessfulMappingAndPersistence() {
         // ARRANGE
-        doNothing().when(userServicePort).saveRestaurant(any(RestaurantModel.class));
+        doNothing().when(userServicePort).saveRestaurant(any(RestaurantModel.class), anyString());
 
         // ACT
-        restaurantHandler.saveRestaurant(mockRequest);
+        restaurantHandler.saveRestaurant(mockRequest, TOKEN_BEARER_TEST);
 
         // ASSERT
         verify(objectRequestMapper, times(1)).toObject(mockRequest);
-        verify(userServicePort, times(1)).saveRestaurant(mockModel);
+        verify(userServicePort, times(1)).saveRestaurant(mockModel, TOKEN_BEARER_TEST);
 
         verify(userServicePort).saveRestaurant(argThat(model ->
                 model.getNombre().equals(mockModel.getNombre()) &&
                         model.getUserId().equals(mockModel.getUserId())
-        ));
+        ), anyString());
     }
 
     @Test
     void saveRestaurant_WhenServicePortThrowsException_ShouldThrow() {
         // ARRANGE
-        doThrow(new RuntimeException("Error en el handler")).when(userServicePort).saveRestaurant(any(RestaurantModel.class));
+        doThrow(new RuntimeException("Error en el handler")).when(userServicePort).saveRestaurant(any(RestaurantModel.class), anyString());
 
         // ACT
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
-            restaurantHandler.saveRestaurant(mockRequest);
-        });
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> restaurantHandler.saveRestaurant(mockRequest, TOKEN_BEARER_TEST));
 
         // ASSERT
         verify(objectRequestMapper, times(1)).toObject(mockRequest);

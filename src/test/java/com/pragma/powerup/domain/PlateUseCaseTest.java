@@ -2,9 +2,12 @@ package com.pragma.powerup.domain;
 
 import com.pragma.powerup.domain.enums.BusinessMessage;
 import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.domain.model.AuthenticatedUserModel;
 import com.pragma.powerup.domain.model.PlateModel;
+import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IPlatePersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.domain.spi.IUserRestPort;
 import com.pragma.powerup.domain.usecase.PlateUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +32,15 @@ class PlateUseCaseTest {
     @Mock
     private IRestaurantPersistencePort restaurantPersistencePort;
 
+    @Mock
+    private IUserRestPort userRestPort;
+
     @InjectMocks
     private PlateUseCase plateUseCase;
 
     private final Long PLATE_ID = 5L;
     private final Long RESTAURANT_ID = 10L;
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
 
     private PlateModel validPlate;
     private PlateModel existingPlate;
@@ -64,15 +71,18 @@ class PlateUseCaseTest {
     @Test
     void savePlate_SuccessfulScenario_PersistsPlateAsActive() {
         // ARRANGE
-        when(restaurantPersistencePort.existsRestaurantById(10L)).thenReturn(true);
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
+        when(restaurantPersistencePort.findRestaurantById(10L)).thenReturn(new RestaurantModel());
 
         doNothing().when(platePersistencePort).savePlate(any(PlateModel.class));
 
         // ACT
-        plateUseCase.savePlate(validPlate);
+        plateUseCase.savePlate(validPlate, TOKEN_BEARER_TEST);
 
         // ASSERT
-        verify(restaurantPersistencePort, times(1)).existsRestaurantById(10L);
+        verify(restaurantPersistencePort, times(1)).findRestaurantById(10L);
         verify(platePersistencePort, times(1)).savePlate(any(PlateModel.class));
         verify(platePersistencePort).savePlate(argThat(plate -> plate.getActive().equals(true)));
     }
@@ -80,11 +90,14 @@ class PlateUseCaseTest {
     @Test
     void savePlate_ThrowsException_WhenRestaurantNotExists() {
         // ARRANGE
-        when(restaurantPersistencePort.existsRestaurantById(10L)).thenReturn(false);
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
+        when(restaurantPersistencePort.findRestaurantById(10L)).thenReturn(null);
 
         // ACT & ASSERT
         DomainException exception = assertThrows(DomainException.class, () ->
-                plateUseCase.savePlate(validPlate)
+                plateUseCase.savePlate(validPlate, TOKEN_BEARER_TEST)
         );
 
         assertEquals(BusinessMessage.RESTAURANT_ID_NOT_EXISTS.getMessage(), exception.getMessage());
@@ -95,13 +108,16 @@ class PlateUseCaseTest {
     @Test
     void savePlate_ThrowsException_WhenPriceIsZero() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         validPlate.setPrice(BigDecimal.ZERO);
 
-        when(restaurantPersistencePort.existsRestaurantById(10L)).thenReturn(true);
+        when(restaurantPersistencePort.findRestaurantById(10L)).thenReturn(new RestaurantModel());
 
         // ACT & ASSERT
         DomainException exception = assertThrows(DomainException.class, () ->
-                plateUseCase.savePlate(validPlate)
+                plateUseCase.savePlate(validPlate, TOKEN_BEARER_TEST)
         );
 
         assertEquals(BusinessMessage.PLATE_PRICE_MUST_BE_POSITIVE.getMessage(), exception.getMessage());
@@ -112,10 +128,13 @@ class PlateUseCaseTest {
     @Test
     void updatePlate_SuccessfulScenario_UpdatesPriceAndDescriptionOnly() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         when(platePersistencePort.getPlateById(PLATE_ID)).thenReturn(existingPlate);
 
         // ACT
-        plateUseCase.updatePlate(updateData);
+        plateUseCase.updatePlate(updateData, TOKEN_BEARER_TEST);
 
         // ASSERT
         verify(platePersistencePort, times(1)).getPlateById(PLATE_ID);
@@ -129,29 +148,35 @@ class PlateUseCaseTest {
         ));
     }
 
-    @Test
-    void updatePlate_ThrowsException_WhenPlateNotFound() {
-        // ARRANGE
-        when(platePersistencePort.getPlateById(PLATE_ID)).thenReturn(null);
+        @Test
+        void updatePlate_ThrowsException_WhenPlateNotFound() {
+            // ARRANGE
+            AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+            userOwner.setRole("ADMIN");
+            when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
+            when(platePersistencePort.getPlateById(PLATE_ID)).thenReturn(null);
 
-        // ACT & ASSERT
-        DomainException exception = assertThrows(DomainException.class, () ->
-                plateUseCase.updatePlate(updateData)
-        );
-        assertEquals(BusinessMessage.PLATE_NOT_FOUND.getMessage(), exception.getMessage());
+            // ACT & ASSERT
+            DomainException exception = assertThrows(DomainException.class, () ->
+                    plateUseCase.updatePlate(updateData, TOKEN_BEARER_TEST)
+            );
+            assertEquals(BusinessMessage.PLATE_NOT_FOUND.getMessage(), exception.getMessage());
 
-        verify(platePersistencePort, never()).savePlate(any());
-    }
+            verify(platePersistencePort, never()).savePlate(any());
+        }
 
     @Test
     void updatePlate_ThrowsException_WhenPriceIsNotPositive() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         when(platePersistencePort.getPlateById(PLATE_ID)).thenReturn(existingPlate);
         updateData.setPrice(new BigDecimal("-5.00"));
 
         // ACT & ASSERT
         DomainException exception = assertThrows(DomainException.class, () ->
-                plateUseCase.updatePlate(updateData)
+                plateUseCase.updatePlate(updateData, TOKEN_BEARER_TEST)
         );
 
         assertEquals(BusinessMessage.PLATE_PRICE_MUST_BE_POSITIVE.getMessage(), exception.getMessage());

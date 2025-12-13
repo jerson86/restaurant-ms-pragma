@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,6 +41,7 @@ class PlateRestControllerTest {
     private CreatePlateRequest validRequest;
     private CreatePlateRequest invalidPriceRequest;
     private final Long PLATE_ID_TEST = 5L;
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
     private UpdatePlateRequest validUpdateRequest;
     private UpdatePlateRequest invalidPriceUpdateRequest;
 
@@ -63,15 +65,16 @@ class PlateRestControllerTest {
     //@WithMockUser(roles = "OWNER")
     void savePlate_ValidRequestAndOwnerRole_ReturnsCreatedStatus() throws Exception {
         // ARRANGE
-        doNothing().when(plateHandler).savePlate(any(CreatePlateRequest.class));
+        doNothing().when(plateHandler).savePlate(any(CreatePlateRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated());
 
-        verify(plateHandler, times(1)).savePlate(any(CreatePlateRequest.class));
+        verify(plateHandler, times(1)).savePlate(any(CreatePlateRequest.class), anyString());
     }
 
     @Test
@@ -84,7 +87,7 @@ class PlateRestControllerTest {
                         .content(objectMapper.writeValueAsString(invalidPriceRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(plateHandler, never()).savePlate(any(CreatePlateRequest.class));
+        verify(plateHandler, never()).savePlate(any(CreatePlateRequest.class), anyString());
     }
 
     @Test
@@ -92,30 +95,32 @@ class PlateRestControllerTest {
     void savePlate_RestaurantNotExists_ReturnsNotFoundStatus() throws Exception {
         // ARRANGE
         doThrow(new DomainException(BusinessMessage.RESTAURANT_ID_NOT_EXISTS))
-                .when(plateHandler).savePlate(any(CreatePlateRequest.class));
+                .when(plateHandler).savePlate(any(CreatePlateRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isNotFound());
 
-        verify(plateHandler, times(1)).savePlate(any(CreatePlateRequest.class));
+        verify(plateHandler, times(1)).savePlate(any(CreatePlateRequest.class), anyString());
     }
 
     @Test
     //@WithMockUser(roles = "OWNER")
     void updatePlate_ValidRequestAndOwnerRole_ReturnsOkStatus() throws Exception {
         // ARRANGE
-        doNothing().when(plateHandler).updatePlate(any(UpdatePlateRequest.class));
+        doNothing().when(plateHandler).updatePlate(any(UpdatePlateRequest.class), anyString());
 
         // ACT & ASSERT
-        mockMvc.perform(put(BASE_URL + "/{id}", PLATE_ID_TEST) // Usar PUT y el ID en el path
+        mockMvc.perform(put(BASE_URL + "/{id}", PLATE_ID_TEST)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
                 .andExpect(status().isOk());
 
-        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class));
+        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class), anyString());
     }
 
 
@@ -131,7 +136,7 @@ class PlateRestControllerTest {
                         .content(objectMapper.writeValueAsString(invalidPriceUpdateRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(plateHandler, never()).updatePlate(any(UpdatePlateRequest.class));
+        verify(plateHandler, never()).updatePlate(any(UpdatePlateRequest.class), anyString());
     }
 
     @Test
@@ -139,29 +144,31 @@ class PlateRestControllerTest {
     void updatePlate_PlateNotFoundException_ReturnsNotFoundStatus() throws Exception {
         // ARRANGE
         doThrow(new DomainException(BusinessMessage.PLATE_NOT_FOUND))
-                .when(plateHandler).updatePlate(any(UpdatePlateRequest.class));
+                .when(plateHandler).updatePlate(any(UpdatePlateRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(put(BASE_URL + "/{id}", PLATE_ID_TEST)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
                 .andExpect(status().isNotFound());
 
-        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class));
+        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class), anyString());
     }
 
     @Test
     void updatePlate_Exception_Not_Controlled() throws Exception {
         // ARRANGE
         doThrow(new RuntimeException("Excepcion no controlada"))
-                .when(plateHandler).updatePlate(any(UpdatePlateRequest.class));
+                .when(plateHandler).updatePlate(any(UpdatePlateRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(put(BASE_URL + "/{id}", PLATE_ID_TEST)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validUpdateRequest)))
                 .andExpect(status().is5xxServerError());
 
-        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class));
+        verify(plateHandler, times(1)).updatePlate(any(UpdatePlateRequest.class), anyString());
     }
 }

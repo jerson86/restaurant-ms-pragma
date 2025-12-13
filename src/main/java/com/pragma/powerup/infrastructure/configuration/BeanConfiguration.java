@@ -50,6 +50,6 @@ public class BeanConfiguration {
 
     @Bean
     public IPlateServicePort plateServicePort() {
-        return new PlateUseCase(platePersistencePort(), restaurantPersistencePort());
+        return new PlateUseCase(platePersistencePort(), restaurantPersistencePort(), userRestPort());
     }
 }

@@ -19,14 +19,19 @@ public class PlateHandler implements IPlateHandler {
     private final IPlateRequestMapper plateRequestMapper;
 
     @Override
-    public void savePlate(CreatePlateRequest createPlateRequest) {
+    public void savePlate(CreatePlateRequest createPlateRequest, String bearerToken) {
         PlateModel plateModel = plateRequestMapper.toModel(createPlateRequest);
-        plateServicePort.savePlate(plateModel);
+        plateServicePort.savePlate(plateModel, bearerToken);
     }
 
     @Override
-    public void updatePlate(UpdatePlateRequest updatePlateRequest) {
+    public void updatePlate(UpdatePlateRequest updatePlateRequest, String bearerToken) {
         PlateModel plateModel = plateRequestMapper.toModel(updatePlateRequest);
-        plateServicePort.updatePlate(plateModel);
+        plateServicePort.updatePlate(plateModel, bearerToken);
+    }
+
+    @Override
+    public void enableDisablePlate(Long plateId, boolean enabled, String bearerToken) {
+        plateServicePort.enableDisablePlate(plateId, enabled, bearerToken);
     }
 }

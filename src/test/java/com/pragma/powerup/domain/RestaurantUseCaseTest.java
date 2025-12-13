@@ -2,6 +2,7 @@ package com.pragma.powerup.domain;
 
 import com.pragma.powerup.domain.enums.BusinessMessage;
 import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.domain.model.AuthenticatedUserModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.model.UserModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
@@ -32,6 +33,8 @@ class RestaurantUseCaseTest {
     private RestaurantModel validRestaurantModel;
     private UserModel mockUser;
 
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
+
     @BeforeEach
     void setUp() {
         validRestaurantModel = new RestaurantModel(
@@ -50,11 +53,14 @@ class RestaurantUseCaseTest {
     @Test
     void saveRestaurant_SuccessfulScenario() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         when(userRestPort.getUserById(validRestaurantModel.getUserId())).thenReturn(mockUser);
         when(userPersistencePort.existsByNit(validRestaurantModel.getNit())).thenReturn(false);
 
         // ACT
-        restaurantUseCase.saveRestaurant(validRestaurantModel);
+        restaurantUseCase.saveRestaurant(validRestaurantModel, TOKEN_BEARER_TEST);
 
         // ASSERT
         verify(userRestPort, times(1)).getUserById(validRestaurantModel.getUserId());
@@ -65,11 +71,14 @@ class RestaurantUseCaseTest {
     @Test
     void saveRestaurant_ThrowsException_WhenUserNotExists() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         when(userRestPort.getUserById(validRestaurantModel.getUserId())).thenReturn(null);
 
         // ACT & ASSERT
         DomainException exception = assertThrows(DomainException.class, () ->
-                restaurantUseCase.saveRestaurant(validRestaurantModel)
+                restaurantUseCase.saveRestaurant(validRestaurantModel, TOKEN_BEARER_TEST)
         );
 
         assertEquals(BusinessMessage.RESTAURANT_USER_ID_NOT_EXISTS.getMessage(), exception.getMessage());
@@ -80,13 +89,15 @@ class RestaurantUseCaseTest {
     @Test
     void saveRestaurant_ThrowsException_WhenNitAlreadyExists() {
         // ARRANGE
+        AuthenticatedUserModel userOwner = new AuthenticatedUserModel();
+        userOwner.setRole("ADMIN");
+        when(userRestPort.getAuthenticatedUser(TOKEN_BEARER_TEST)).thenReturn(userOwner);
         when(userRestPort.getUserById(validRestaurantModel.getUserId())).thenReturn(mockUser);
-
         when(userPersistencePort.existsByNit(validRestaurantModel.getNit())).thenReturn(true);
 
         // ACT & ASSERT
         DomainException exception = assertThrows(DomainException.class, () ->
-                restaurantUseCase.saveRestaurant(validRestaurantModel)
+                restaurantUseCase.saveRestaurant(validRestaurantModel, TOKEN_BEARER_TEST)
         );
 
         assertEquals(BusinessMessage.RESTAURANT_NIT_ALREADY_EXISTS.getMessage(), exception.getMessage());

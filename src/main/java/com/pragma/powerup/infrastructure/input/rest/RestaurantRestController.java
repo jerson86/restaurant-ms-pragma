@@ -8,12 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/restaurant")
@@ -28,8 +26,9 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "409", description = "restaurant already exists", content = @Content)
     })
     @PostMapping
-    public ResponseEntity<Void> save(@Valid @RequestBody CreateRestaurantRequest createRestaurantRequest) {
-        restaurantHandler.saveRestaurant(createRestaurantRequest);
+    public ResponseEntity<Void> save(@Valid @RequestBody CreateRestaurantRequest createRestaurantRequest,
+                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        restaurantHandler.saveRestaurant(createRestaurantRequest, bearerToken);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

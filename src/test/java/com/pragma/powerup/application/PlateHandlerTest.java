@@ -37,6 +37,8 @@ class PlateHandlerTest {
     private UpdatePlateRequest mockUpdateRequest;
     private PlateModel mockUpdateModel;
 
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
+
     @BeforeEach
     void setUp() {
         mockRequest = new CreatePlateRequest(
@@ -57,14 +59,14 @@ class PlateHandlerTest {
     void savePlate_CallsMapperAndUseCase() {
         // ARRANGE
         when(plateRequestMapper.toModel(mockRequest)).thenReturn(mockModel);
-        doNothing().when(plateServicePort).savePlate(any(PlateModel.class));
+        doNothing().when(plateServicePort).savePlate(any(PlateModel.class), anyString());
 
         // ACT
-        plateHandler.savePlate(mockRequest);
+        plateHandler.savePlate(mockRequest, TOKEN_BEARER_TEST);
 
         // ASSERT
         verify(plateRequestMapper, times(1)).toModel(mockRequest);
-        verify(plateServicePort, times(1)).savePlate(mockModel);
+        verify(plateServicePort, times(1)).savePlate(mockModel, TOKEN_BEARER_TEST);
     }
 
     @Test
@@ -73,11 +75,11 @@ class PlateHandlerTest {
         when(plateRequestMapper.toModel(mockRequest)).thenReturn(mockModel);
 
         doThrow(new DomainException(BusinessMessage.PLATE_PRICE_MUST_BE_POSITIVE))
-                .when(plateServicePort).savePlate(any(PlateModel.class));
+                .when(plateServicePort).savePlate(any(PlateModel.class), anyString());
 
         // ACT & ASSERT
         assertThrows(DomainException.class, () ->
-                plateHandler.savePlate(mockRequest)
+                plateHandler.savePlate(mockRequest, TOKEN_BEARER_TEST)
         );
 
         verify(plateRequestMapper, times(1)).toModel(mockRequest);
@@ -87,15 +89,15 @@ class PlateHandlerTest {
     void updatePlate_CallsMapperAndUseCase() {
         // ARRANGE
         when(plateRequestMapper.toModel(mockUpdateRequest)).thenReturn(mockUpdateModel);
-        doNothing().when(plateServicePort).updatePlate(any(PlateModel.class));
+        doNothing().when(plateServicePort).updatePlate(any(PlateModel.class), anyString());
 
         // ACT
-        plateHandler.updatePlate(mockUpdateRequest);
+        plateHandler.updatePlate(mockUpdateRequest, TOKEN_BEARER_TEST);
 
         // ASSERT
         verify(plateRequestMapper, times(1)).toModel(mockUpdateRequest);
 
-        verify(plateServicePort, times(1)).updatePlate(mockUpdateModel);
+        verify(plateServicePort, times(1)).updatePlate(mockUpdateModel, TOKEN_BEARER_TEST);
     }
 
     @Test
@@ -104,11 +106,11 @@ class PlateHandlerTest {
         when(plateRequestMapper.toModel(mockUpdateRequest)).thenReturn(mockUpdateModel);
 
         doThrow(new DomainException(BusinessMessage.PLATE_NOT_FOUND))
-                .when(plateServicePort).updatePlate(any(PlateModel.class));
+                .when(plateServicePort).updatePlate(any(PlateModel.class), anyString());
 
         // ACT & ASSERT
         assertThrows(DomainException.class, () ->
-                plateHandler.updatePlate(mockUpdateRequest)
+                plateHandler.updatePlate(mockUpdateRequest, TOKEN_BEARER_TEST)
         );
 
         verify(plateRequestMapper, times(1)).toModel(mockUpdateRequest);

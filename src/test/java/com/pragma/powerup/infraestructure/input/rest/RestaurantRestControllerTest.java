@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,6 +35,7 @@ class RestaurantRestControllerTest {
     private CreateRestaurantRequest validRequest;
     private CreateRestaurantRequest invalidRequest;
     private final String BASE_URL = "/api/v1/restaurant";
+    private final String TOKEN_BEARER_TEST = "Bearer: test";
 
     @BeforeEach
     void setUp() {
@@ -44,18 +46,19 @@ class RestaurantRestControllerTest {
     @Test
     void save_ValidRequest_ReturnsCreatedStatus() throws Exception {
         // ARRANGE
-        doNothing().when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
+        doNothing().when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated());
 
         verify(restaurantHandler, times(1)).saveRestaurant(argThat(req ->
                 req.getNombre().equals(validRequest.getNombre()) &&
                         req.getUserId().equals(validRequest.getUserId())
-        ));
+        ), anyString());
     }
 
     @Test
@@ -66,36 +69,38 @@ class RestaurantRestControllerTest {
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
 
-        verify(restaurantHandler, never()).saveRestaurant(any(CreateRestaurantRequest.class));
+        verify(restaurantHandler, never()).saveRestaurant(any(CreateRestaurantRequest.class), anyString());
     }
 
     @Test
     void save_UserNotExists_ReturnsNotFoundStatus() throws Exception {
         // ARRANGE
         doThrow(new DomainException(BusinessMessage.RESTAURANT_USER_ID_NOT_EXISTS))
-                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
+                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isNotFound());
 
-        verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
+        verify(restaurantHandler, times(1)).saveRestaurant(any(), anyString());
     }
 
     @Test
     void save_NitAlreadyExists_ReturnsConflictStatus() throws Exception {
         // ARRANGE
         doThrow(new DomainException(BusinessMessage.RESTAURANT_NIT_ALREADY_EXISTS))
-                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class));
+                .when(restaurantHandler).saveRestaurant(any(CreateRestaurantRequest.class), anyString());
 
         // ACT & ASSERT
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, TOKEN_BEARER_TEST)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isConflict());
 
-        verify(restaurantHandler, times(1)).saveRestaurant(validRequest);
+        verify(restaurantHandler, times(1)).saveRestaurant(any(), anyString());
     }
 }

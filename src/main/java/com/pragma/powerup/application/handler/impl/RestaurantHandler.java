@@ -18,8 +18,8 @@ public class RestaurantHandler implements IRestaurantHandler {
     private final IRestaurantRequestMapper objectRequestMapper;
 
     @Override
-    public void saveRestaurant(CreateRestaurantRequest createRestaurantRequest) {
+    public void saveRestaurant(CreateRestaurantRequest createRestaurantRequest, String bearerToken) {
         RestaurantModel restaurantModel = objectRequestMapper.toObject(createRestaurantRequest);
-        userServicePort.saveRestaurant(restaurantModel);
+        userServicePort.saveRestaurant(restaurantModel, bearerToken);
     }
 }
