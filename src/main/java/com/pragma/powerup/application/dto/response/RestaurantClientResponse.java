@@ -1,4 +1,4 @@
-package com.pragma.powerup.application.dto.request;
+package com.pragma.powerup.application.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;

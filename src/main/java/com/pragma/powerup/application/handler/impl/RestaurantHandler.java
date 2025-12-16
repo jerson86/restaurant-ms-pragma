@@ -1,7 +1,7 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.CreateRestaurantRequest;
-import com.pragma.powerup.application.dto.request.RestaurantClientResponse;
+import com.pragma.powerup.application.dto.response.RestaurantClientResponse;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.application.mapper.IRestaurantRequestMapper;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;

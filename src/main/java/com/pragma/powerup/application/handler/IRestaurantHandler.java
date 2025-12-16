@@ -1,7 +1,7 @@
 package com.pragma.powerup.application.handler;
 
 import com.pragma.powerup.application.dto.request.CreateRestaurantRequest;
-import com.pragma.powerup.application.dto.request.RestaurantClientResponse;
+import com.pragma.powerup.application.dto.response.RestaurantClientResponse;
 
 import java.util.List;
 

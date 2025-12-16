@@ -1,7 +1,7 @@
 package com.pragma.powerup.application.mapper;
 
 import com.pragma.powerup.application.dto.request.CreatePlateRequest;
-import com.pragma.powerup.application.dto.request.PlateClientResponse;
+import com.pragma.powerup.application.dto.response.PlateClientResponse;
 import com.pragma.powerup.application.dto.request.UpdatePlateRequest;
 import com.pragma.powerup.domain.model.PlateModel;
 import org.mapstruct.Mapper;

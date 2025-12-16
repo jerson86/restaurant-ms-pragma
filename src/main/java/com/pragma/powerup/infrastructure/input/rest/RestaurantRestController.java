@@ -1,7 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.CreateRestaurantRequest;
-import com.pragma.powerup.application.dto.request.RestaurantClientResponse;
+import com.pragma.powerup.application.dto.response.RestaurantClientResponse;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

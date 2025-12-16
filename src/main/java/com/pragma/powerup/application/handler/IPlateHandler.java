@@ -1,7 +1,7 @@
 package com.pragma.powerup.application.handler;
 
 import com.pragma.powerup.application.dto.request.CreatePlateRequest;
-import com.pragma.powerup.application.dto.request.PlateClientResponse;
+import com.pragma.powerup.application.dto.response.PlateClientResponse;
 import com.pragma.powerup.application.dto.request.UpdatePlateRequest;
 
 import java.util.List;
