@@ -70,6 +70,6 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort(), platePersistencePort(), userRestPort());
+        return new OrderUseCase(orderPersistencePort(), platePersistencePort(), userRestPort(), restaurantPersistencePort());
     }
 }
