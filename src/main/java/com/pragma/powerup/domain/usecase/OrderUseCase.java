@@ -3,6 +3,7 @@ package com.pragma.powerup.domain.usecase;
 import com.pragma.powerup.domain.api.IOrderServicePort;
 import com.pragma.powerup.domain.enums.BusinessMessage;
 import com.pragma.powerup.domain.exception.DomainException;
+import com.pragma.powerup.domain.model.AuthenticatedUserModel;
 import com.pragma.powerup.domain.model.OrderModel;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
@@ -56,5 +57,29 @@ public class OrderUseCase implements IOrderServicePort {
         }
 
         return orderPersistencePort.getOrdersByStatusAndRestaurant(restaurantId, status, offset, size);
+    }
+
+    @Override
+    public void assignOrder(Long orderId, String bearerToken) {
+        AuthenticatedUserModel authenticatedUser = userRestPort.getAuthenticatedUser(bearerToken);
+
+        OrderModel orderModel = orderPersistencePort.getOrderById(orderId);
+
+        if (orderModel == null) {
+            throw new DomainException(BusinessMessage.ORDER_NOT_FOUND);
+        }
+
+        if (!orderModel.getRestaurantId().equals(authenticatedUser.getRestaurantId())) {
+            throw new DomainException(BusinessMessage.ORDER_NOT_ACCESS_RESTAURANT);
+        }
+
+        if (!orderModel.getStatus().equals("PENDIENTE")) {
+            throw new DomainException(BusinessMessage.ORDER_IS_ONLY_STATUS_PENDING);
+        }
+
+        orderModel.setEmployeeId(authenticatedUser.getId());
+        orderModel.setStatus("EN_PREPARACION");
+
+        orderPersistencePort.saveOrder(orderModel);
     }
 }

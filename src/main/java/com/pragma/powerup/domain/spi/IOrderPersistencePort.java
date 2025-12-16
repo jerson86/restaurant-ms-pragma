@@ -8,4 +8,6 @@ public interface IOrderPersistencePort {
     boolean hasActiveOrder(Long clientId);
     void createOrder(OrderModel orderModel);
     List<OrderModel> getOrdersByStatusAndRestaurant(Long restaurantId, String status, int offset, int limit);
+    OrderModel getOrderById(Long orderId);
+    void saveOrder(OrderModel orderModel);
 }

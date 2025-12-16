@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.OrderAssignmentRequest;
 import com.pragma.powerup.application.dto.request.OrderRequest;
 import com.pragma.powerup.application.dto.response.OrderResponse;
 import com.pragma.powerup.application.handler.IOrderHandler;
@@ -54,5 +55,15 @@ public class OrderRestController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Asignarse a pedidos y cambiar estado a EN_PREPARACION")
+    @PatchMapping("/employee/assign")
+    public ResponseEntity<Void> assignOrders(
+            @RequestBody OrderAssignmentRequest request,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        orderHandler.assignOrders(request, token);
+        return ResponseEntity.ok().build();
     }
 }

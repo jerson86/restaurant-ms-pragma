@@ -10,4 +10,5 @@ import lombok.*;
 public class AuthenticatedUserModel {
     private Long id;
     private String role;
+    private Long restaurantId;
 }

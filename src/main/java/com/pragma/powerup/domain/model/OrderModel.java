@@ -15,4 +15,6 @@ public class OrderModel {
     private Long restaurantId;
     private Long clientId;
     private List<OrderPlateModel> plates;
+    private String status;
+    Long employeeId;
 }
