@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.CreatePlateRequest;
+import com.pragma.powerup.application.dto.request.PlateClientResponse;
 import com.pragma.powerup.application.dto.request.UpdatePlateRequest;
 import com.pragma.powerup.application.handler.IPlateHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/plate")
@@ -66,5 +69,27 @@ public class PlateRestController {
 
         plateHandler.enableDisablePlate(plateId, enabled, bearerToken);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Listar todos los platos paginados y ordenados por restaurante")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de platos"),
+            @ApiResponse(responseCode = "204", description = "No hay platos disponibles")
+    })
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<List<PlateClientResponse>> getAllPlates(
+            @PathVariable Long restaurantId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+
+        List<PlateClientResponse> responseList = plateHandler.getAllPlatesByRestaurant(restaurantId, categoryId,page, size, bearerToken);
+
+        if (responseList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(responseList);
     }
 }

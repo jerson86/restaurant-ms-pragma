@@ -12,6 +12,7 @@ import com.pragma.powerup.domain.spi.IUserRestPort;
 import com.pragma.powerup.domain.util.AuthValidator;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PlateUseCase implements IPlateServicePort {
 
@@ -85,5 +86,12 @@ public class PlateUseCase implements IPlateServicePort {
 
         existingPlate.setActive(enabled);
         platePersistencePort.updatePlate(existingPlate);
+    }
+
+    @Override
+    public List<PlateModel> getAllPlatesByRestaurant(Long restaurantId, Long categoryId, int page, int size, String bearerToken) {
+        AuthValidator.validateUser(userRestPort, bearerToken);
+        int offset = page * size;
+        return platePersistencePort.getPlateListByRestaurant(restaurantId, categoryId, offset, size);
     }
 }

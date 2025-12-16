@@ -8,6 +8,8 @@ import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserRestPort;
 import com.pragma.powerup.domain.util.AuthValidator;
 
+import java.util.List;
+
 public class RestaurantUseCase implements IRestaurantServicePort {
 
     private final IRestaurantPersistencePort userPersistencePort;
@@ -31,5 +33,12 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         }
 
         userPersistencePort.saveRestaurant(restaurantModel);
+    }
+
+    @Override
+    public List<RestaurantModel> getAllRestaurants(int page, int size, String bearerToken) {
+        AuthValidator.validateUser(userRestPort, bearerToken);
+        int offset = page * size;
+        return userPersistencePort.getAllRestaurants(offset, size);
     }
 }

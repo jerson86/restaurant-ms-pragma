@@ -1,6 +1,7 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.CreatePlateRequest;
+import com.pragma.powerup.application.dto.request.PlateClientResponse;
 import com.pragma.powerup.application.dto.request.UpdatePlateRequest;
 import com.pragma.powerup.application.handler.IPlateHandler;
 import com.pragma.powerup.application.mapper.IPlateRequestMapper;
@@ -9,6 +10,8 @@ import com.pragma.powerup.domain.model.PlateModel;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +36,14 @@ public class PlateHandler implements IPlateHandler {
     @Override
     public void enableDisablePlate(Long plateId, boolean enabled, String bearerToken) {
         plateServicePort.enableDisablePlate(plateId, enabled, bearerToken);
+    }
+
+    @Override
+    public List<PlateClientResponse> getAllPlatesByRestaurant(Long restaurantId, Long categoryId, int page, int size, String bearerToken) {
+        List<PlateModel> plateList = plateServicePort.getAllPlatesByRestaurant(restaurantId, categoryId, page, size, bearerToken);
+
+        return plateList.stream()
+                .map(plateRequestMapper::toClientResponse)
+                .toList();
     }
 }
