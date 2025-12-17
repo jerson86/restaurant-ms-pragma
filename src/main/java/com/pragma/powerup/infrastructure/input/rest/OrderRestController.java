@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.OrderAssignmentRequest;
+import com.pragma.powerup.application.dto.request.OrderDeliveryRequest;
 import com.pragma.powerup.application.dto.request.OrderRequest;
 import com.pragma.powerup.application.dto.response.OrderResponse;
 import com.pragma.powerup.application.handler.IOrderHandler;
@@ -64,6 +65,16 @@ public class OrderRestController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
 
         orderHandler.assignOrders(request, token);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Entregar pedido con PIN de seguridad")
+    @PatchMapping("/employee/deliver")
+    public ResponseEntity<Void> deliverOrder(
+            @Valid @RequestBody OrderDeliveryRequest request,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        orderHandler.deliverOrder(request, token);
         return ResponseEntity.ok().build();
     }
 }

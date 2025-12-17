@@ -14,7 +14,9 @@ public enum BusinessMessage {
     PLATE_IN_PROCESS("El cliente ya tiene un pedido en proceso (Pendiente, En Preparación o Listo)."),
     ORDER_NOT_FOUND("El pedido solicitado no existe."),
     ORDER_NOT_ACCESS_RESTAURANT("No tienes permiso para asignar un pedido de otro restaurante."),
-    ORDER_IS_ONLY_STATUS_PENDING("Solo se pueden asignar pedidos que estén en estado PENDIENTE.");
+    ORDER_IS_ONLY_STATUS_PENDING("Solo se pueden asignar pedidos que estén en estado PENDIENTE."),
+    DELIVERED_ONLY_STATUS_READY("Solo se pueden entregar pedidos que estén en estado LISTO."),
+    DELIVERED_SECURIRY_PIN_INCORRECT("El PIN de seguridad es incorrecto.");
 
     private final String message;
 }

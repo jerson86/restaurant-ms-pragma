@@ -17,4 +17,5 @@ public class OrderModel {
     private List<OrderPlateModel> plates;
     private String status;
     Long employeeId;
+    String SecurityPin;
 }

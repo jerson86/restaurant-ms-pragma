@@ -1,6 +1,7 @@
 package com.pragma.powerup.application.handler;
 
 import com.pragma.powerup.application.dto.request.OrderAssignmentRequest;
+import com.pragma.powerup.application.dto.request.OrderDeliveryRequest;
 import com.pragma.powerup.application.dto.request.OrderRequest;
 import com.pragma.powerup.application.dto.response.OrderResponse;
 
@@ -11,4 +12,6 @@ public interface IOrderHandler {
     List<OrderResponse> getOrdersByStatus(Long restaurantId, String status, int page, int size, String bearerToken);
 
     void assignOrders(OrderAssignmentRequest request, String token);
+
+    void deliverOrder(OrderDeliveryRequest request, String token);
 }

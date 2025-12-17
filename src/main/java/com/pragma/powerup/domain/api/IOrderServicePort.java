@@ -9,4 +9,6 @@ public interface IOrderServicePort {
     List<OrderModel> getOrdersByStatus(Long restaurantId, String status, int page, int size, String bearerToken);
 
     void assignOrder(Long orderId, String bearerToken);
+
+    void deliverOrder(Long orderId, String securityPin, String bearerToken);
 }

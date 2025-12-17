@@ -82,4 +82,31 @@ public class OrderUseCase implements IOrderServicePort {
 
         orderPersistencePort.saveOrder(orderModel);
     }
+
+    @Override
+    public void deliverOrder(Long orderId, String securityPin, String bearerToken) {
+        AuthenticatedUserModel authenticatedUser = userRestPort.getAuthenticatedUser(bearerToken);
+        OrderModel orderModel = orderPersistencePort.getOrderById(orderId);
+
+
+        if (orderModel == null) {
+            throw new DomainException(BusinessMessage.ORDER_NOT_FOUND);
+        }
+
+        if (!orderModel.getRestaurantId().equals(authenticatedUser.getRestaurantId())) {
+            throw new DomainException(BusinessMessage.ORDER_NOT_ACCESS_RESTAURANT);
+        }
+
+        if (!"LISTO".equals(orderModel.getStatus())) {
+            throw new DomainException(BusinessMessage.DELIVERED_ONLY_STATUS_READY);
+        }
+
+        if (orderModel.getSecurityPin() == null || !orderModel.getSecurityPin().equals(securityPin)) {
+            throw new DomainException(BusinessMessage.DELIVERED_SECURIRY_PIN_INCORRECT);
+        }
+
+        orderModel.setStatus("ENTREGADO");
+
+        orderPersistencePort.saveOrder(orderModel);
+    }
 }

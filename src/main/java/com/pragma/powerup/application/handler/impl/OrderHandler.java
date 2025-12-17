@@ -1,6 +1,7 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.OrderAssignmentRequest;
+import com.pragma.powerup.application.dto.request.OrderDeliveryRequest;
 import com.pragma.powerup.application.dto.request.OrderRequest;
 import com.pragma.powerup.application.dto.response.OrderResponse;
 import com.pragma.powerup.application.handler.IOrderHandler;
@@ -39,5 +40,10 @@ public class OrderHandler implements IOrderHandler {
         for (Long orderId : request.getOrderIds()) {
             orderServicePort.assignOrder(orderId, bearerToken);
         }
+    }
+
+    @Override
+    public void deliverOrder(OrderDeliveryRequest request, String bearerToken) {
+        orderServicePort.deliverOrder(request.getOrderId(), request.getSecurityPin(), bearerToken);
     }
 }
