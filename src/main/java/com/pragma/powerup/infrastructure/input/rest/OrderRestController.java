@@ -77,4 +77,14 @@ public class OrderRestController {
         orderHandler.deliverOrder(request, token);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "HU16 - Cancelar pedido (Solo Clientes)")
+    @PatchMapping("/client/cancel/{id}")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable(name = "id") Long orderId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+
+        orderHandler.cancelOrder(orderId, token);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -46,4 +46,9 @@ public class OrderHandler implements IOrderHandler {
     public void deliverOrder(OrderDeliveryRequest request, String bearerToken) {
         orderServicePort.deliverOrder(request.getOrderId(), request.getSecurityPin(), bearerToken);
     }
+
+    @Override
+    public void cancelOrder(Long orderId, String bearerToken) {
+        orderServicePort.cancelOrder(orderId, bearerToken);
+    }
 }

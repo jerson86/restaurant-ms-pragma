@@ -109,4 +109,25 @@ public class OrderUseCase implements IOrderServicePort {
 
         orderPersistencePort.saveOrder(orderModel);
     }
+
+    @Override
+    public void cancelOrder(Long orderId, String bearerToken) {
+        OrderModel orderModel = orderPersistencePort.getOrderById(orderId);
+        AuthenticatedUserModel authenticatedUser = userRestPort.getAuthenticatedUser(bearerToken);
+
+        if (orderModel == null) {
+            throw new DomainException(BusinessMessage.ORDER_NOT_FOUND);
+        }
+
+        if (!orderModel.getClientId().equals(authenticatedUser.getId())) {
+            throw new DomainException(BusinessMessage.DELIVERED_NOT_PERMISSION_CANCEL_ORDER);
+        }
+
+        if (!"PENDIENTE".equals(orderModel.getStatus())) {
+            throw new DomainException(BusinessMessage.ORDER_PREPARED_CANNOT_CANCEL);
+        }
+
+        orderModel.setStatus("CANCELADO");
+        orderPersistencePort.saveOrder(orderModel);
+    }
 }

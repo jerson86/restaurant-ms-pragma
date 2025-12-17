@@ -14,4 +14,6 @@ public interface IOrderHandler {
     void assignOrders(OrderAssignmentRequest request, String token);
 
     void deliverOrder(OrderDeliveryRequest request, String token);
+
+    void cancelOrder(Long orderId, String bearerToken);
 }

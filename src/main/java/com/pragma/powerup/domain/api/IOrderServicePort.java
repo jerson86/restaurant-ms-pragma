@@ -11,4 +11,6 @@ public interface IOrderServicePort {
     void assignOrder(Long orderId, String bearerToken);
 
     void deliverOrder(Long orderId, String securityPin, String bearerToken);
+
+    void cancelOrder(Long orderId, String bearerToken);
 }

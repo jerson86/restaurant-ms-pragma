@@ -16,7 +16,9 @@ public enum BusinessMessage {
     ORDER_NOT_ACCESS_RESTAURANT("No tienes permiso para asignar un pedido de otro restaurante."),
     ORDER_IS_ONLY_STATUS_PENDING("Solo se pueden asignar pedidos que estén en estado PENDIENTE."),
     DELIVERED_ONLY_STATUS_READY("Solo se pueden entregar pedidos que estén en estado LISTO."),
-    DELIVERED_SECURIRY_PIN_INCORRECT("El PIN de seguridad es incorrecto.");
+    DELIVERED_SECURIRY_PIN_INCORRECT("El PIN de seguridad es incorrecto."),
+    DELIVERED_NOT_PERMISSION_CANCEL_ORDER("No tienes permiso para cancelar este pedido."),
+    ORDER_PREPARED_CANNOT_CANCEL("Lo sentimos, tu pedido ya está en preparación y no puede cancelarse");
 
     private final String message;
 }
